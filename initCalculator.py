@@ -10,8 +10,11 @@ def window_collaborators():
 root = tk.Tk()
 root.title("Menú")
 
-open_classicCalculator = tk.Button(root, text="Iniciar Calculadora", command=window_classicCalculator)
+open_classicCalculator = tk.Button(root, text="Calculadora Clásica", command=window_classicCalculator)
 open_classicCalculator.pack(pady=10)
+
+open_binaryCalculator = tk.Button(root, text="Calculadora Binaria")
+open_binaryCalculator.pack(pady=10)
 
 open_collaborators = tk.Button(root, text="Créditos", command=window_collaborators)
 open_collaborators.pack(pady=10)
