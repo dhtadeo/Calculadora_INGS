@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import math
 from datetime import datetime
 
@@ -6,14 +7,21 @@ class CalculatorApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Calculadora")
-        self.entry = tk.Entry(self, width=40)
-        self.entry.grid(row=0, column=0, columnspan=5, padx=1, pady=1)
+        self.entry = tk.Entry(self, width=45)
+        self.entry.grid(row=0, column=0, columnspan=6, padx=1, pady=1)
+
+        # Iniciar métodos
         self.create_buttons()
         self.create_calc_button()
         self.create_clear_button()
         self.create_history_button()
+        self.create_binary_button()
 
+        # Lista que agrupará el historial de operaciones
         self.history = []
+
+        # Evitar que la ventana se pueda maximizar porque no quiero (se ve mal)
+        self.resizable(False, False)
 
     def create_buttons(self):
         buttons_layout = [
@@ -29,16 +37,20 @@ class CalculatorApp(tk.Tk):
                 button.grid(row=i, column=j, padx=0, pady=0)
 
     def create_clear_button(self):
-        clear_button = CalculatorButton(self, 'C', command=self.clear_entry)
-        clear_button.grid(row=5, column=3, padx=5, pady=5)
+        clear_button = CalculatorButton(self, 'CLR', command=self.clear_entry)
+        clear_button.grid(row=5, column=4, padx=0, pady=0)
 
     def create_calc_button(self):
         calc_button = CalculatorButton(self, '=', command=self.evaluate_expression)
-        calc_button.grid(row=5, column=4, padx=5, pady=5)
+        calc_button.grid(row=5, column=3, padx=0, pady=0)
 
     def create_history_button(self):
-        history_button = CalculatorButton(self, 'Historial', command=self.show_history)
-        history_button.grid(row=6, column=0, columnspan=5, padx=5, pady=5)
+        history_button = CalculatorButton(self, 'HIST', command=self.show_history)
+        history_button.grid(row=5, column=5, padx=0, pady=0)
+
+    def create_binary_button(self):
+        binary_button = CalculatorButton(self, 'MORE', command=self.show_other_results)
+        binary_button.grid(row=5, column=0, padx=0, pady=0)
 
     def handle_button_click(self, text):
         if text == 'x^2':
@@ -57,9 +69,12 @@ class CalculatorApp(tk.Tk):
             self.entry.insert(tk.END, 'math.tan(')
         elif text == 'log2':
             self.entry.insert(tk.END, 'math.log2(')
-
         else:
             self.entry.insert(tk.END, text)
+
+    def handle_error(self, error):
+        messagebox.showerror("Error", f"{type(error).__name__}\n{str(error)}")
+        self.entry.delete(0, tk.END)
 
     def evaluate_expression(self):
         try:
@@ -70,18 +85,9 @@ class CalculatorApp(tk.Tk):
             self.history.append(operation)
             self.entry.delete(0, tk.END)
             self.entry.insert(tk.END, str(result))
-        except ZeroDivisionError:
-            self.entry.delete(0, tk.END)
-            self.entry.insert(tk.END, "Error: División por cero")
-        except ValueError:
-            self.entry.delete(0, tk.END)
-            self.entry.insert(tk.END, "Error: Argumento inválido")
-        except OverflowError:
-            self.entry.delete(0, tk.END)
-            self.entry.insert(tk.END, "Error: Desbordamiento")
         except Exception as e:
-            self.entry.delete(0, tk.END)
-            self.entry.insert(tk.END, "Error")
+            self.handle_error(e)
+            
 
     def clear_entry(self):
         self.entry.delete(0, tk.END)
@@ -94,6 +100,17 @@ class CalculatorApp(tk.Tk):
         for entry in self.history:
             history_text.insert(tk.END, f"> {entry['operation']}\n = {entry['result']}\nAt: {entry['time']}\n\n")
         history_text.config(state=tk.DISABLED)
+
+    def show_other_results(self):
+        try:
+            expression = self.entry.get()
+            result = eval(expression)
+            to_bin = bin(result)[2:]
+            to_oct = oct(result)[2:]
+            to_hex = hex(result)[2:]
+            messagebox.showinfo(f"Más resultados", f"> {expression}\n\nDEC: {result}\nBIN: {to_bin}\nOCT: {to_oct}\nHEX: {to_hex}")
+        except Exception as e:
+            self.handle_error(e)
 
 class CalculatorButton(tk.Button):
     def __init__(self, master, text, **kwargs):
