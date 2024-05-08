@@ -3,6 +3,7 @@ from tkinter import messagebox
 import math
 from datetime import datetime
 
+# Clase principal de la calculadora (Está ligada a una clase de la biblioteca de tkinter.)
 class CalculatorApp(tk.Tk): 
     def __init__(self):
         super().__init__()
@@ -15,7 +16,7 @@ class CalculatorApp(tk.Tk):
         self.create_calc_button()
         self.create_clear_button()
         self.create_history_button()
-        self.create_binary_button()
+        self.create_more_options_button()
 
         # Lista que agrupará el historial de operaciones
         self.history = []
@@ -23,6 +24,7 @@ class CalculatorApp(tk.Tk):
         # Evitar que la ventana se pueda maximizar porque no quiero (se ve mal)
         self.resizable(False, False)
 
+    # Crea los botones utilizando una lista y dos for anidados que harán las filas y columnas
     def create_buttons(self):
         buttons_layout = [
             ['(', ')', 'π', '/', 'x^2', 'sin'],
@@ -36,22 +38,27 @@ class CalculatorApp(tk.Tk):
                 button = CalculatorButton(self, text, command=lambda t=text: self.handle_button_click(t))
                 button.grid(row=i, column=j, padx=0, pady=0)
 
+    # Crear botón de limpiar entrada
     def create_clear_button(self):
         clear_button = CalculatorButton(self, 'CLR', command=self.clear_entry)
         clear_button.grid(row=5, column=4, padx=0, pady=0)
 
+    # Crear botón de igual a
     def create_calc_button(self):
         calc_button = CalculatorButton(self, '=', command=self.evaluate_expression)
         calc_button.grid(row=5, column=3, padx=0, pady=0)
 
+    # Crear botón de historial
     def create_history_button(self):
         history_button = CalculatorButton(self, 'HIST', command=self.show_history)
         history_button.grid(row=5, column=5, padx=0, pady=0)
 
-    def create_binary_button(self):
-        binary_button = CalculatorButton(self, 'MORE', command=self.show_other_results)
-        binary_button.grid(row=5, column=0, padx=0, pady=0)
+    # Crear botón de más opciones
+    def create_more_options_button(self):
+        more_options_button = CalculatorButton(self, 'MORE', command=self.show_other_results)
+        more_options_button.grid(row=5, column=0, padx=0, pady=0)
 
+    # Cuando se dé clic a cierto botón aperecerá una expresión diferente según el texto del botón
     def handle_button_click(self, text):
         if text == 'x^2':
             self.entry.insert(tk.END, '**2')
@@ -72,14 +79,15 @@ class CalculatorApp(tk.Tk):
         else:
             self.entry.insert(tk.END, text)
 
+    # Manejo de errores
     def handle_error(self, error):
         messagebox.showerror("Error", f"{type(error).__name__}\n{str(error)}")
         self.entry.delete(0, tk.END)
 
+    # Evaluar la expresión
     def evaluate_expression(self):
         try:
-            expression = self.entry.get()
-            expression = expression.replace("π", str(math.pi))
+            expression = self.entry.get().replace("π", str(math.pi))
             result = eval(expression)
             operation = {'operation': expression, 'result': result, 'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             self.history.append(operation)
@@ -87,11 +95,12 @@ class CalculatorApp(tk.Tk):
             self.entry.insert(tk.END, str(result))
         except Exception as e:
             self.handle_error(e)
-            
 
+    # Limpiar la entrada de texto
     def clear_entry(self):
         self.entry.delete(0, tk.END)
 
+    # Muestra el historial con los cálculos realizados previamente (No aplica con el botón de más opciones de resultados)
     def show_history(self):
         history_window = tk.Toplevel(self)
         history_window.title("Historial de Operaciones")
@@ -101,9 +110,10 @@ class CalculatorApp(tk.Tk):
             history_text.insert(tk.END, f"> {entry['operation']}\n = {entry['result']}\nAt: {entry['time']}\n\n")
         history_text.config(state=tk.DISABLED)
 
+    # Muestra en un message box otros sistemas (decimal, binario, octal y hexadecimal)
     def show_other_results(self):
         try:
-            expression = self.entry.get()
+            expression = self.entry.get().replace("π", str(math.pi))
             result = eval(expression)
             to_bin = bin(result)[2:]
             to_oct = oct(result)[2:]
@@ -112,10 +122,29 @@ class CalculatorApp(tk.Tk):
         except Exception as e:
             self.handle_error(e)
 
+# Clase para asignar propiedades a los botones (Está ligada a una clase de la biblioteca de tkinter.)
 class CalculatorButton(tk.Button):
     def __init__(self, master, text, **kwargs):
         super().__init__(master, text=text, width=5, height=2, **kwargs)
 
+# Clase especializada para las pruebas
+# Hereda de CalculatorApp que contiene los métodos
+class ForTesting(CalculatorApp):
+    def __init__(self):
+        super().__init__()
+
+    # Evaluar expresiones con un dato (Únicamente ejecutable en test_init_Calculator.py)
+    def evaluate_expression_with_base(self, expression):
+        try:
+            result = eval(expression)
+            operation = {'operation': expression, 'result': result, 'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+            self.history.append(operation)
+            self.entry.delete(0, tk.END)
+            self.entry.insert(tk.END, str(result))
+        except Exception as e:
+            self.handle_error(e)
+
+# Iniciar programa
 if __name__ == "__main__":
     app = CalculatorApp()
     app.mainloop()
