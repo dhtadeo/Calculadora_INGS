@@ -14,7 +14,6 @@ root.title("Créditos")
 label1 = tk.Label(root, text="- CALCULADORA -\n")
 label1.pack(pady=1)
 
-# Label 2
 label2 = tk.Label(root, text="Santiago Emiliano Cheluja Martín\nLuis Alexis Martínez Rodríguez\nDiego Hernández Tadeo\n\n")
 label2.pack(pady=1)
 
